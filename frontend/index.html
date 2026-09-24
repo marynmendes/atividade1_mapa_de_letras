@@ -1,68 +1,92 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mapa de Letras — Busca de Caminho</title>
-<link rel="stylesheet" href="src/style.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mapa de Letras, Busca de Caminho</title>
+    <link rel="stylesheet" href="src/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Mapa de Letras</h1>
+    </header>
 
-<header>
-  <h1>Mapa de Letras</h1>
-  <p>Busca de caminho ponto a ponto — trabalho de Algoritmos e Complexidade</p>
-</header>
+    <main>
+      <section class="card">
+        <div class="form-row">
+          <div class="field">
+            <label for="inicio">Ponto de início</label>
+            <select id="inicio"></select>
+          </div>
+          <div class="field">
+            <label for="fim">Ponto de fim</label>
+            <select id="fim"></select>
+          </div>
+          <div class="field">
+            <label for="tipoDist">Tipo de distância</label>
+            <select id="tipoDist">
+              <option value="1">Euclidiana</option>
+              <option value="2">Manhattan</option>
+              <option value="3">Chebyshev</option>
+            </select>
+          </div>
+          <div class="field" style="flex: 0">
+            <button class="primary" id="btnBuscar" type="button">
+              Buscar caminho
+            </button>
+          </div>
+        </div>
+        <div class="error-msg" id="errMsg" hidden></div>
+      </section>
 
-<main>
-  <section class="card">
-    <div class="form-row">
-      <div class="field">
-        <label for="inicio">Ponto de início</label>
-        <select id="inicio"></select>
-      </div>
-      <div class="field">
-        <label for="fim">Ponto de fim</label>
-        <select id="fim"></select>
-      </div>
-      <div class="field">
-        <label for="tipoDist">Tipo de distância</label>
-        <select id="tipoDist">
-          <option value="1">Euclidiana</option>
-          <option value="2">Manhattan</option>
-          <option value="3">Chebyshev</option>
-        </select>
-      </div>
-      <div class="field" style="flex:0;">
-        <button class="primary" id="btnBuscar" type="button">Buscar caminho</button>
-      </div>
-    </div>
-    <div class="error-msg" id="errMsg" hidden></div>
-  </section>
+      <section class="card">
+        <h2>Mapa</h2>
+        <div class="map-wrap">
+          <svg
+            id="svgMapa"
+            viewBox="0 0 610 460"
+            xmlns="http://www.w3.org/2000/svg"
+          ></svg>
+        </div>
+        <div class="legend">
+          <span class="legend-item"
+            ><span class="legend-swatch used"></span>Caminho encontrado</span
+          >
+          <span class="legend-item"
+            ><span class="legend-swatch discard"></span>Descartado na
+            busca</span
+          >
+          <span class="legend-item"
+            ><span class="legend-swatch normal"></span>Não utilizado</span
+          >
+        </div>
+        <div class="status-line" id="statusLine">Carregando mapa...</div>
+      </section>
 
-  <section class="card">
-    <h2>Mapa</h2>
-    <div class="map-wrap">
-      <svg id="svgMapa" viewBox="0 0 610 460" xmlns="http://www.w3.org/2000/svg"></svg>
-    </div>
-    <div class="status-line" id="statusLine">Carregando mapa...</div>
-  </section>
+      <section class="card" id="resultCard" hidden>
+        <h2>Caminho encontrado</h2>
+        <table id="tabelaCaminho">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Ponto</th>
+              <th>Distância acumulada</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
 
-  <section class="card" id="resultCard" hidden>
-    <h2>Caminho encontrado</h2>
-    <table id="tabelaCaminho">
-      <thead><tr><th>#</th><th>Ponto</th><th>Distância acumulada</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </section>
+      <section class="card" id="discardCard" hidden>
+        <h2>Pontos descartados durante a busca</h2>
+        <div id="discardList"></div>
+      </section>
+    </main>
 
-  <section class="card" id="discardCard" hidden>
-    <h2>Pontos descartados durante a busca</h2>
-    <div id="discardList"></div>
-  </section>
-</main>
+    <footer>
+      Front-end consumindo a API Flask que roda em cima de main.py / mapa.py.
+    </footer>
 
-<footer>Front-end consumindo a API Flask que roda em cima de main.py / mapa.py.</footer>
-
-<script src="src/script.js"></script>
-</body>
+    <script src="src/script.js"></script>
+  </body>
 </html>

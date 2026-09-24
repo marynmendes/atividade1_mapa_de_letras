@@ -1,7 +1,12 @@
+// Front-end "burro": não tem nenhuma lógica de busca de caminho aqui.
+// Os pontos do mapa e o algoritmo de busca vêm todos da API Flask
+// (/api/pontos e /api/buscar-caminho), que por sua vez chama as funções
+// originais do mapa.py.
+
 const CELL = 78,
   PAD = 40;
 
-let pontos = {};
+let pontos = {}; // preenchido a partir de /api/pontos
 let LETRAS = [];
 
 function coord(letra) {
@@ -13,6 +18,7 @@ function desenharMapa(resultado) {
   const svg = document.getElementById("svgMapa");
   svg.innerHTML = "";
 
+  // marcadores de seta (recriados a cada desenho, já que o innerHTML é limpo acima)
   const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
   defs.innerHTML = `
     <marker id="arrow-edge" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
@@ -21,11 +27,14 @@ function desenharMapa(resultado) {
     <marker id="arrow-path" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
       <path d="M0,0 L10,5 L0,10 z" class="arrowhead-path"></path>
     </marker>
+    <marker id="arrow-discard" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" class="arrowhead-discard"></path>
+    </marker>
   `;
   svg.appendChild(defs);
 
   const NODE_R = 13,
-    GAP = 4;
+    GAP = 4; // espaço entre a ponta da seta e o círculo do destino
 
   const ordemUsado = resultado
     ? resultado.caminho.map((item) => item.ponto)
@@ -36,18 +45,41 @@ function desenharMapa(resultado) {
     pathSet.add(ordemUsado[i] + ">" + ordemUsado[i + 1]);
   }
 
+  // pontos que o algoritmo chegou a olhar, mas descartou durante a busca
+  const discardSet = new Set();
+  if (resultado) {
+    for (const item of resultado.descartes) {
+      for (const d of item.descartados) {
+        discardSet.add(item.ponto + ">" + d);
+      }
+    }
+  }
+
+  // arestas (o grafo é direcionado: a seta mostra de onde pra onde dá pra ir)
   for (const letra of LETRAS) {
     const c1 = coord(letra);
     for (const v of pontos[letra].vizinhos) {
       if (!pontos[v]) continue;
       const c2 = coord(v);
       const isPath = pathSet.has(letra + ">" + v);
+      const isDiscard = !isPath && discardSet.has(letra + ">" + v);
 
+      // encurta o fim da linha pra a seta não ficar escondida atrás do círculo do destino
       const dx = c2.x - c1.x,
         dy = c2.y - c1.y;
       const dist = Math.hypot(dx, dy) || 1;
       const endX = c2.x - (dx / dist) * (NODE_R + GAP);
       const endY = c2.y - (dy / dist) * (NODE_R + GAP);
+
+      let cls = "edge";
+      let marker = "url(#arrow-edge)";
+      if (isPath) {
+        cls += " path";
+        marker = "url(#arrow-path)";
+      } else if (isDiscard) {
+        cls += " discard";
+        marker = "url(#arrow-discard)";
+      }
 
       const line = document.createElementNS(
         "http://www.w3.org/2000/svg",
@@ -57,15 +89,13 @@ function desenharMapa(resultado) {
       line.setAttribute("y1", c1.y);
       line.setAttribute("x2", endX);
       line.setAttribute("y2", endY);
-      line.setAttribute("class", "edge" + (isPath ? " path" : ""));
-      line.setAttribute(
-        "marker-end",
-        isPath ? "url(#arrow-path)" : "url(#arrow-edge)",
-      );
+      line.setAttribute("class", cls);
+      line.setAttribute("marker-end", marker);
       svg.appendChild(line);
     }
   }
 
+  // pontos
   for (const letra of LETRAS) {
     const c = coord(letra);
     const isUsed = usados.has(letra);
