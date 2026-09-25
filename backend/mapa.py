@@ -80,11 +80,7 @@ def distancia(ponto1, ponto2, opcao):
         return distancia_chebyshev(ponto1, ponto2)
 
 #função para encontrar o caminho entre dois pontos
-#OBS: a única mudança em relação ao script original é que "opcao" agora é
-#um parâmetro da função, em vez de ser perguntado aqui dentro com input().
-#Isso foi necessário porque o backend web não tem como fazer uma pergunta
-#interativa no terminal - quem chama a função (main.py ou a API) que decide
-#a opção e passa pra cá. O resto da lógica não foi alterado.
+
 def buscar_caminho(ponto_inicial, ponto_final, opcao):
     caminho_usado = {}    
     caminho_descartado = {}
@@ -113,7 +109,8 @@ def buscar_caminho(ponto_inicial, ponto_final, opcao):
                 continue
             dist_vizfin = distancia(vizinho, ponto_final, opcao)
             dist_vizatual = distancia(ponto_atual, vizinho, opcao)
-            dist_momento = dist_vizfin + dist_vizatual
+            custo_real_g = distancia_final + dist_vizatual
+            dist_momento = dist_vizfin + custo_real_g
             if dist_momento < valor_distancia or valor_distancia == 0.0:
                 valor_distancia = dist_momento
                 novo_ponto = vizinho
@@ -123,7 +120,7 @@ def buscar_caminho(ponto_inicial, ponto_final, opcao):
         if novo_ponto is None:
             del caminho_usado[ponto_atual]
             ponto_anterior = list(caminho_usado.keys())[-1]
-            descartados_atual[ponto_atual].append(ponto_atual)
+            descartados_atual[ponto_anterior].append(ponto_atual)
             distancia_final -= distancia(ponto_anterior, ponto_atual, opcao)
             ponto_atual = ponto_anterior
             continue
